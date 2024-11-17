@@ -52,3 +52,4 @@ secrets.json
 # Ignore other OS-specific files
 .DS_Store
 Thumbs.db
+/WeatherApp/appsettings.json
