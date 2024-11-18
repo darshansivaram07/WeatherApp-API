@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WeatherApp.Interface;
+using WeatherApp.Services;
 
 namespace WeatherApp.Controllers
 {
@@ -9,26 +11,34 @@ namespace WeatherApp.Controllers
     public class WeatherAppController : ControllerBase
     {
         private readonly IWeatherService _weatherService;
+        private readonly TokenGenerationService _tokenHelper;
 
-        public WeatherAppController(IWeatherService weatherService)
+        public WeatherAppController(IWeatherService weatherService, TokenGenerationService tokenHelper)
         {
             _weatherService = weatherService;
+            _tokenHelper = tokenHelper;
         }
-
+        [HttpGet("token")]
+        public IActionResult GetToken()
+        {
+            var token = _tokenHelper.GenerateToken();
+            return Ok(new { Token = token });
+        }
+        [Authorize]
         [HttpGet("current")]
         public async Task<IActionResult> GetCurrentWeather(string location)
         {
             var weather = await _weatherService.GetCurrentWeatherAsync(location);
             return Ok(weather);
         }
-
+        [Authorize]
         [HttpGet("past7days")]
         public async Task<IActionResult> GetPast7DaysWeather(string location)
         {
             var weather = await _weatherService.GetPast7DaysWeatherAsync(location);
             return Ok(weather);
         }
-
+        [Authorize]
         [HttpGet("forecast7days")]
         public async Task<IActionResult> Get7DayForecast(string location)
         {
