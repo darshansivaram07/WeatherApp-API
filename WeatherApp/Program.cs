@@ -65,6 +65,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddScoped<IWeatherService, WeatherService>();
 builder.Services.AddSingleton<TokenGenerationService>();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddMemoryCache();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
