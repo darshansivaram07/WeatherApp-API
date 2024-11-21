@@ -24,21 +24,21 @@ namespace WeatherApp.Controllers
             var token = _tokenHelper.GenerateToken();
             return Ok(new { Token = token });
         }
-        [Authorize]
+        [Authorize(Roles = "User")]
         [HttpGet("current")]
         public async Task<IActionResult> GetCurrentWeather(string location)
         {
             var weather = await _weatherService.GetCurrentWeatherAsync(location);
             return Ok(weather);
         }
-        [Authorize]
+        [Authorize(Roles = "User")]
         [HttpGet("past7days")]
         public async Task<IActionResult> GetPast7DaysWeather(string location)
         {
             var weather = await _weatherService.GetPast7DaysWeatherAsync(location);
             return Ok(weather);
         }
-        [Authorize]
+        [Authorize(Roles = "User")]
         [HttpGet("forecast7days")]
         public async Task<IActionResult> Get7DayForecast(string location)
         {
