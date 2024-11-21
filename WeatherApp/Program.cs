@@ -1,21 +1,23 @@
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 using System.Text;
 using WeatherApp.Interface;
 using WeatherApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddHttpClient("WeatherApi", client =>
 {
     client.BaseAddress = new Uri("https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/");
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
+
+
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
@@ -28,14 +30,17 @@ builder.Services.AddAuthentication("Bearer")
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtSettings["Issuer"],
             ValidAudience = jwtSettings["Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"])),
+            RoleClaimType = ClaimTypes.Role 
         };
     });
+
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Weather API", Version = "v1" });
 
-    // Add the JWT Authorization to Swagger
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -45,6 +50,7 @@ builder.Services.AddSwaggerGen(c =>
         BearerFormat = "JWT",
         Description = "Enter your JWT token in the format **Bearer &lt;token&gt;**"
     });
+
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -62,11 +68,22 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("WeatherAppCorsPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")  
+              .WithMethods("GET", "OPTIONS")         
+              .AllowAnyHeader();                    
+    });
+});
+
+
 builder.Services.AddScoped<IWeatherService, WeatherService>();
 builder.Services.AddSingleton<TokenGenerationService>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddMemoryCache();
-builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -77,6 +94,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
+
+
+app.UseCors("WeatherAppCorsPolicy");
 
 
 app.UseAuthentication();

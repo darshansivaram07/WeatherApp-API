@@ -19,12 +19,13 @@ namespace WeatherApp.Services
             var issuer = jwtSettings["Issuer"];
             var audience = jwtSettings["Audience"];
             var expiryInMinutes = int.Parse(jwtSettings["ExpiryInMinutes"]);
-
+            var defaultRole = "User";
             var claims = new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, "WeatherApiAccess"),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+                new Claim(JwtRegisteredClaimNames.Sub, "WeatherApiAccess"),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, defaultRole)
+            };
 
             var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 
